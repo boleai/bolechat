@@ -7,12 +7,22 @@ const SettingsModal = ({ isOpen, onClose, currentApiKey }) => {
 
   const handleSave = async () => {
     try {
+      const trimmedApiKey = apiKey.trim();
+      
+      // 验证 API Key 格式
+      if (!trimmedApiKey.startsWith('sk-') || trimmedApiKey.length < 20) {
+        alert('请输入正确格式的 API Key');
+        return;
+      }
+      
       setSaving(true);
       // 调用后端API保存API Key
-      await axios.post('/api/settings/apikey', { apiKey });
+      await axios.post('http://localhost:3000/api/settings/apikey', { 
+        apiKey: trimmedApiKey
+      });
       
       // 保存到localStorage作为缓存
-      localStorage.setItem('siliconflow_api_key', apiKey);
+      localStorage.setItem('siliconflow_api_key', trimmedApiKey);
       
       onClose();
     } catch (error) {

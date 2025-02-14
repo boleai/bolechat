@@ -19,10 +19,12 @@ const ChatList = ({ onSelectChat, currentChatId }) => {
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
-        const response = await axios.get('/api/settings/apikey');
+        const response = await axios.get('http://localhost:3000/api/settings/apikey');
         const { apiKey } = response.data;
-        setApiKey(apiKey);
-        localStorage.setItem('siliconflow_api_key', apiKey);
+        if (apiKey) {
+          setApiKey(apiKey);
+          localStorage.setItem('siliconflow_api_key', apiKey);
+        }
       } catch (error) {
         console.error('获取API Key失败:', error);
       }
