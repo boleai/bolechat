@@ -27,10 +27,52 @@ body {
   flex-direction: column;
 }
 
+.list-header {
+  margin-bottom: 16px;
+}
+
+.sessions {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.list-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #eaeaea;
+}
+
+.settings-button {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: transparent;
+  color: #666;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-button:hover {
+  background-color: #edf1fd;
+  color: #4e7dff;
+}
+
+.settings-button svg {
+  opacity: 0.7;
+}
+
+.settings-button:hover svg {
+  opacity: 1;
+}
+
 .chat-list button {
   width: 100%;
   padding: 10px 16px;
-  margin-bottom: 16px;
   background-color: #4e7dff;
   color: white;
   border: none;
@@ -59,11 +101,10 @@ body {
   background-size: contain;
 }
 
-.sessions {
-  overflow-y: auto;
-}
-
 .chat-session {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px 16px;
   margin-bottom: 4px;
   background-color: transparent;
@@ -72,6 +113,44 @@ body {
   transition: all 0.2s;
   color: #666;
   font-size: 14px;
+}
+
+.session-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.chat-session:hover .session-actions {
+  opacity: 1;
+}
+
+.delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #ff4d4f;
 }
 
 .chat-session:hover {
@@ -148,10 +227,10 @@ body {
 .message {
   max-width: 85%;
   margin-bottom: 24px;
-  padding: 16px;
+  padding: 14px 18px;
   border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .message.user {
@@ -181,60 +260,48 @@ body {
 
 /* 底部输入区域 */
 .chat-footer {
+  padding: 16px 24px 24px;
+  background: #fff;
   border-top: 1px solid #eaeaea;
-  background-color: #ffffff;
-  padding: 16px 24px;
 }
 
 .input-area {
   display: flex;
   gap: 12px;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
 .input-area input {
   flex: 1;
-  padding: 12px 16px;
+  height: 44px;
+  padding: 8px 16px;
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 15px;
   transition: all 0.2s;
-  background-color: #f7f9fc;
 }
 
 .input-area input:focus {
   outline: none;
   border-color: #4e7dff;
-  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(78, 125, 255, 0.2);
 }
 
 .input-area button {
-  padding: 12px 24px;
+  padding: 0 24px;
+  height: 44px;
   background-color: #4e7dff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 15px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
   transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.input-area button::after {
-  content: "";
-  width: 16px;
-  height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 5l7 7-7 7M5 5l7 7-7 7'/%3E%3C/svg%3E");
-  background-size: contain;
 }
 
 .input-area button:hover {
   background-color: #3d6af2;
-  transform: translateY(-1px);
 }
 
 /* API Key 输入框样式 */
@@ -282,26 +349,6 @@ body {
   margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid #eaeaea;
-}
-
-.settings-button {
-  width: 100%;
-  padding: 12px 16px;
-  background-color: transparent;
-  color: #666;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
-}
-
-.settings-button:hover {
-  background-color: #edf1fd;
-  color: #4e7dff;
 }
 
 .settings-panel {
@@ -488,4 +535,412 @@ body {
 .message.loading {
   background-color: #f7f9fc;
   opacity: 0.8;
+}
+
+/* Markdown 样式 */
+.message.assistant {
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.message.assistant p {
+  margin: 0 0 1.2em;
+}
+
+.message.assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.message.assistant h1,
+.message.assistant h2,
+.message.assistant h3,
+.message.assistant h4 {
+  margin: 1.5em 0 0.5em;
+  color: #333;
+}
+
+.message.assistant ul,
+.message.assistant ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.message.assistant li {
+  margin: 0.3em 0;
+}
+
+/* 消息操作按钮样式 */
+.message {
+  position: relative;
+}
+
+.message-actions {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.message:hover .message-actions {
+  opacity: 1;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  background-color: #f5f5f5;
+  color: #4e7dff;
+}
+
+.action-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 代码块容器 */
+.code-block-wrapper {
+  position: relative;
+  margin: 1em 0;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  background: #2d2d2d;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.code-block-header .copy-button {
+  background: #3d3d3d;
+  border: none;
+  color: #fff;
+}
+
+.code-block-header .copy-button:hover {
+  background: #4d4d4d;
+}
+
+/* 代码块样式 */
+.code-block {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1em;
+  border-radius: 0 0 6px 6px;
+  overflow-x: auto;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.block-code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.inline-code {
+  background: #f3f3f3;
+  color: #e01e5a;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+}
+
+/* 表格样式 */
+.message.assistant table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.message.assistant th,
+.message.assistant td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.message.assistant th {
+  background-color: #f5f5f5;
+}
+
+/* 链接样式 */
+.message.assistant a {
+  color: #4e7dff;
+  text-decoration: none;
+}
+
+.message.assistant a:hover {
+  text-decoration: underline;
+}
+
+/* 引用样式 */
+.message.assistant blockquote {
+  border-left: 4px solid #4e7dff;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #666;
+}
+
+/* 解释说明的样式 */
+.message.assistant .explanation {
+  margin: 1em 0;
+  padding: 0.8em;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+/* 代码块之间的间距 */
+.code-block-wrapper + .code-block-wrapper {
+  margin-top: 1.5em;
+}
+
+/* 代码块和说明文字之间的间距 */
+.code-block-wrapper + p,
+p + .code-block-wrapper {
+  margin-top: 1.2em;
+}
+
+/* Markdown 内容样式 */
+.markdown-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 16px;
+  color: #24292f;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* 标题样式 */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 1em;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1a1a1a;
+}
+
+.markdown-content h1 {
+  font-size: 1.5em;
+}
+
+.markdown-content h2 {
+  font-size: 1.3em;
+}
+
+.markdown-content h3 {
+  font-size: 1.1em;
+}
+
+/* 调整段落间距和行高 */
+.markdown-content p {
+  margin: 0.3em 0;
+  line-height: 1.4;
+  color: #24292f;
+}
+
+/* 调整列表样式 */
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.2em 0 0.2em 1em;
+  padding-left: 1.5em;
+}
+
+.markdown-content li {
+  margin: 0.1em 0;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* 列表项标记样式 */
+.markdown-content ul li::before {
+  content: "•";
+  position: absolute;
+  left: -1em;
+  color: #666;
+}
+
+/* 解释文本样式 */
+.markdown-content .explanation {
+  background-color: #f8f9fa;
+  padding: 1em;
+  margin: 1em 0;
+  border-radius: 6px;
+  border-left: 4px solid #4e7dff;
+  font-size: 14px;
+  color: #57606a;
+}
+
+/* 调整消息容器样式 */
+.message {
+  max-width: 85%;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.message.assistant {
+  background-color: #f8f9fa;
+  border: 1px solid #eaecef;
+}
+
+.message.user {
+  background-color: #edf1fd;
+  border: none;
+}
+
+/* 错误提示样式 */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 8px auto;
+  max-width: 600px;
+  background-color: #fef1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 6px;
+  color: #be123c;
+  font-size: 15px;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  color: #be123c;
+}
+
+/* 用户消息样式 */
+.user-message {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* 设置面板样式 */
+.settings-panel {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-item {
+  margin-bottom: 12px;
+}
+
+.settings-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.api-key-input {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.api-key-input input {
+  width: 100%;
+  padding: 8px 12px;
+  padding-right: 60px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #f7f9fc;
+}
+
+.api-key-input input:focus {
+  outline: none;
+  border-color: #4e7dff;
+  background-color: #ffffff;
+}
+
+.toggle-visibility {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.save-button {
+  width: 100%;
+  padding: 8px;
+  background-color: #4e7dff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.save-button:hover {
+  background-color: #3d6af2;
+}
+
+/* 成功提示消息样式 */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #f6fef9;
+  border: 1px solid #b7eb8f;
+  border-radius: 4px;
+  color: #52c41a;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.success-message svg {
+  flex-shrink: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

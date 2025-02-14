@@ -48,7 +48,7 @@ const SettingsModal = ({ isOpen, onClose, currentApiKey }) => {
             <label>API Key</label>
             <input
               type="password"
-              value={apiKey}
+              value={""}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="请输入 API Key"
             />
