@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Chat from './components/Chat';
 import ChatList from './components/ChatList';
+import Chat from './components/Chat';
 import './styles/Chat.css';
 
 function App() {
@@ -8,13 +8,8 @@ function App() {
 
   return (
     <div className="app">
-      <ChatList 
-        onSelectChat={setCurrentChatId} 
-        currentChatId={currentChatId}
-      />
-      <Chat 
-        currentChatId={currentChatId}
-      />
+      <ChatList onSelectChat={setCurrentChatId} currentChatId={currentChatId} />
+      <Chat currentChatId={currentChatId} />
     </div>
   );
 }
