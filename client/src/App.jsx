@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
 import Settings from './components/Settings';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
 import './styles/Chat.css';
+import logo from './icon/logo.png';
 
 const App = () => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [chats, setChats] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState(null);
 
   // 加载所有会话
   useEffect(() => {
@@ -56,22 +60,34 @@ const App = () => {
   // 删除会话
   const handleDeleteChat = (chatId, e) => {
     e.stopPropagation(); // 阻止事件冒泡
-    if (window.confirm('确定要删除这个会话吗？')) {
-      const updatedChats = chats.filter(chat => chat.id !== chatId);
-      setChats(updatedChats);
-      localStorage.setItem('chat_sessions', JSON.stringify(updatedChats));
-      
-      // 如果删除的是当前会话，清空当前会话
-      if (chatId === currentChatId) {
-        setCurrentChatId(null);
-      }
+    setChatToDelete(chatId);
+    setDeleteModalOpen(true);
+  };
+
+  // 添加确认删除的处理函数
+  const handleConfirmDelete = () => {
+    const updatedChats = chats.filter(chat => chat.id !== chatToDelete);
+    setChats(updatedChats);
+    localStorage.setItem('chat_sessions', JSON.stringify(updatedChats));
+    
+    // 如果删除的是当前会话，清空当前会话
+    if (chatToDelete === currentChatId) {
+      setCurrentChatId(null);
     }
+    
+    setDeleteModalOpen(false);
+    setChatToDelete(null);
   };
 
   return (
     <div className="app">
       <div className="chat-list">
         <div className="list-header">
+          <div className="logo">
+            <span className="logo-text">
+              <img src={logo} alt="logo" />
+            </span>
+          </div>
           <button onClick={createNewChat}>
             新建会话
           </button>
@@ -116,6 +132,14 @@ const App = () => {
         onUpdateChatTitle={updateChatTitle}
       />
       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <DeleteConfirmModal 
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setChatToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

@@ -21,6 +21,7 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
   const [copyTip, setCopyTip] = useState('');
   const [showControls, setShowControls] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const useStream = true; // 默认使用流式响应
   
   // 加载当前会话消息
   useEffect(() => {
@@ -75,61 +76,127 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
       content: trimmedInput
     };
 
-    // 立即更新UI并保存用户消息
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
     saveMessagesToLocal(updatedMessages);
     
-    // 如果是会话的第一条消息，更新会话标题
     if (messages.length === 0) {
       onUpdateChatTitle(currentChatId, trimmedInput);
     }
     
     setInput('');
     setLoading(true);
-    setErrorMessage(''); // 清除之前的错误信息
+    setErrorMessage('');
 
     try {
-      const response = await axios.post('https://api.siliconflow.cn/v1/chat/completions', {
-        messages: updatedMessages,
-        model: "deepseek-ai/DeepSeek-V3",
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 8000
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000, // 设置30秒超时
-      });
+      if (useStream) {
+        // 流式响应处理
+        const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messages: updatedMessages,
+            model: "deepseek-ai/DeepSeek-R1",
+            stream: true,
+            temperature: 0.7,
+            max_tokens: 8000
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      const assistantMessage = {
-        role: 'assistant',
-        content: response.data.choices[0].message.content
-      };
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantMessage = {
+          role: 'assistant',
+          content: ''
+        };
 
-      // 更新UI并保存完整对话
-      const finalMessages = [...updatedMessages, assistantMessage];
-      setMessages(finalMessages);
-      saveMessagesToLocal(finalMessages);
+        // 添加一个空的助手消息到UI，但只添加一次
+        setMessages(prevMessages => [...prevMessages, assistantMessage]);
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                break;
+              }
+
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices[0]?.delta?.content || '';
+                assistantMessage.content += content;
+
+                // 更新UI显示流式响应
+                setMessages(messages => {
+                  const newMessages = [...messages];
+                  newMessages[newMessages.length - 1] = { ...assistantMessage };
+                  return newMessages;
+                });
+              } catch (e) {
+                console.error('Error parsing SSE message:', e);
+              }
+            }
+          }
+        }
+
+        // 保存完整对话到本地存储
+        saveMessagesToLocal([...updatedMessages, assistantMessage]);
+      } else {
+        // 非流式响应处理
+        const response = await axios.post('https://api.siliconflow.cn/v1/chat/completions', {
+          messages: updatedMessages,
+          model: "deepseek-ai/DeepSeek-V3",
+          stream: false,
+          temperature: 0.7,
+          max_tokens: 8000
+        }, {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000,
+        });
+
+        const assistantMessage = {
+          role: 'assistant',
+          content: response.data.choices[0].message.content
+        };
+
+        const finalMessages = [...updatedMessages, assistantMessage];
+        setMessages(finalMessages);
+        saveMessagesToLocal(finalMessages);
+      }
       
     } catch (error) {
       console.error('Error:', error);
       let message = '发送消息失败，请重试';
-      if (error.code === 'ECONNABORTED' || error.response?.status === 504) {
+      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
+          error.message?.includes('status: 504') || error.response?.status === 504) {
         message = '服务器响应超时，请稍后重试';
-      } else if (error.response?.status === 401) {
+      } else if (error.message?.includes('status: 401') || error.response?.status === 401) {
         message = 'API Key 无效或已过期，请检查设置';
-      } else if (error.response?.status >= 500) {
+      } else if (error.message?.includes('status: 5') || error.response?.status >= 500) {
         message = '服务器暂时不可用，请稍后重试';
       } else if (!navigator.onLine) {
         message = '网络连接已断开，请检查网络设置';
       }
       setErrorMessage(message);
       
-      // 如果是超时错误，移除loading状态下的最后一条消息
-      if (error.code === 'ECONNABORTED' || error.response?.status === 504) {
+      if (error.name === 'AbortError' || error.code === 'ECONNABORTED' || 
+          error.message?.includes('status: 504') || error.response?.status === 504) {
         setMessages(updatedMessages);
       }
     } finally {
@@ -143,7 +210,7 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
         {messages.length === 0 ? (
           <div className="welcome-screen">
             <div className="welcome-icon">🤖</div>
-            <h1>我是 BoleChat, 很高兴见到你!</h1>
+            <h1>我是 BOLE Chat, 很高兴见到你!</h1>
             <p>我可以帮你写代码、读文件、写作各种创意内容，请把你的任务交给我吧~</p>
           </div>
         ) : (
@@ -163,21 +230,21 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
                       p: ({node, ...props}) => (
                         <p style={{
                           whiteSpace: 'pre-wrap',
-                          marginBottom: '0.5em',
-                          lineHeight: '1.5'
+                          marginBottom: '0.2em',
+                          lineHeight: '1.3'
                         }} {...props} />
                       ),
                       ul: ({node, ...props}) => (
                         <ul style={{
-                          marginTop: '0.3em',
-                          marginBottom: '0.3em',
+                          marginTop: '0.2em',
+                          marginBottom: '0.2em',
                           paddingLeft: '1.5em'
                         }} {...props} />
                       ),
                       ol: ({node, ...props}) => (
                         <ol style={{
-                          marginTop: '0.3em',
-                          marginBottom: '0.3em',
+                          marginTop: '0.2em',
+                          marginBottom: '0.2em',
                           paddingLeft: '1.5em'
                         }} {...props} />
                       ),
@@ -203,8 +270,8 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
                       ),
                       li: ({node, ...props}) => (
                         <li style={{
-                          marginBottom: '0.2em',
-                          lineHeight: '1.5',
+                          marginBottom: '0.1em',
+                          lineHeight: '1.3',
                           display: 'list-item'
                         }} {...props} />
                       ),
