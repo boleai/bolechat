@@ -3,6 +3,25 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 
+// API 配置
+// const API_CONFIG = {
+//   BASE_URL: 'https://api.siliconflow.cn/v1/chat/completions',
+//   MODEL_NAME: 'deepseek-ai/DeepSeek-R1',
+//   STREAM_MODEL: 'deepseek-ai/DeepSeek-R1',
+//   NON_STREAM_MODEL: 'deepseek-ai/DeepSeek-V3',
+//   MAX_TOKENS: 8000,
+//   TEMPERATURE: 0.7
+// };
+const API_CONFIG = {
+  BASE_URL: 'https://api.deepseek.com/chat/completions',
+  MODEL_NAME: 'deepseek-chat',
+  STREAM_MODEL: 'deepseek-chat',
+  NON_STREAM_MODEL: 'deepseek-chat',
+  MAX_TOKENS: 8000,
+  TEMPERATURE: 0.7
+};
+
+
 // 复制文本的辅助函数
 const copyToClipboard = async (text) => {
   try {
@@ -91,7 +110,7 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
     try {
       if (useStream) {
         // 流式响应处理
-        const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        const response = await fetch(API_CONFIG.BASE_URL, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -99,10 +118,10 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
           },
           body: JSON.stringify({
             messages: updatedMessages,
-            model: "deepseek-ai/DeepSeek-R1",
+            model: API_CONFIG.STREAM_MODEL,
             stream: true,
-            temperature: 0.7,
-            max_tokens: 8000
+            temperature: API_CONFIG.TEMPERATURE,
+            max_tokens: API_CONFIG.MAX_TOKENS
           })
         });
         
@@ -156,12 +175,12 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
         saveMessagesToLocal([...updatedMessages, assistantMessage]);
       } else {
         // 非流式响应处理
-        const response = await axios.post('https://api.siliconflow.cn/v1/chat/completions', {
+        const response = await axios.post(API_CONFIG.BASE_URL, {
           messages: updatedMessages,
-          model: "deepseek-ai/DeepSeek-V3",
+          model: API_CONFIG.NON_STREAM_MODEL,
           stream: false,
-          temperature: 0.7,
-          max_tokens: 8000
+          temperature: API_CONFIG.TEMPERATURE,
+          max_tokens: API_CONFIG.MAX_TOKENS
         }, {
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -209,8 +228,8 @@ const Chat = ({ currentChatId, onUpdateChatTitle }) => {
       <div className="chat-content">
         {messages.length === 0 ? (
           <div className="welcome-screen">
-            <div className="welcome-icon">🤖</div>
-            <h1>我是 BOLE Chat, 很高兴见到你!</h1>
+            <div className="welcome-icon">🐘</div>
+            <h1>我是 大象AI Chat, 很高兴见到你!</h1>
             <p>我可以帮你写代码、读文件、写作各种创意内容，请把你的任务交给我吧~</p>
           </div>
         ) : (
